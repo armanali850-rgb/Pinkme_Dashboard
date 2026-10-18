@@ -1,0 +1,446 @@
+@php
+    $registration->loadMissing(['program', 'user', 'reviewer', 'assignedCaseManager']);
+    $status = strtolower((string) $registration->status);
+    $badgeClasses = match ($status) {
+        \App\Models\ProgramRegistration::STATUS_APPROVED => 'bg-[#C5E8D1] text-[#20B354] border border-[#A5D0B7]',
+        \App\Models\ProgramRegistration::STATUS_REJECTED => 'bg-[#FAD4D4] text-[#B32020] border border-[#E6A5A5]',
+        \App\Models\ProgramRegistration::STATUS_PENDING_FINANCE => 'bg-amber-100 text-amber-900 border border-amber-200',
+        default => 'bg-[#FDE8F3] text-[#9E2469] border border-[#F4BBD5]',
+    };
+
+    $programLabels = [
+        'breast_cancer_treatment' => 'Breast Cancer Treatment Assistance Program',
+        'mastectomy_wellness' => 'Pink Mastectomy and Wellness Assistance Program',
+        'pinkme_food_hunger' => 'PINK ME Food & Hunger Grant',
+    ];
+
+    $incomeLabels = [
+        'employed' => 'Employed',
+        'self_employed' => 'Self Employed',
+        'disabled' => 'Disabled',
+        'retired' => 'Retired',
+        'student' => 'Student',
+    ];
+
+    $authorizationLabels = [
+        'full_name' => 'Use my full name',
+        'story_anonymous' => 'Share part of my story anonymously',
+        'story_full' => 'Share my story with my name',
+        'photos' => 'Use photos / media of me',
+        'contact_details' => 'Contact me for follow-ups related to my story',
+    ];
+
+    $quarterLabels = [
+        'option1' => 'Option 1: May through June',
+        'option2' => 'Option 2: November through December',
+    ];
+@endphp
+
+@extends('case_manager.layouts.app')
+
+@section('title', 'Program Registration Request')
+
+@section('content')
+    <main class="flex-1">
+        <div class="max-w-full mx-auto">
+            <div class="mt-6 bg-[#F6EDF5] rounded-xl p-6 md:p-8 space-y-8 shadow-sm">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-[#DCCFD8] pb-5">
+                    <div>
+                        <h2 class="text-3xl font-semibold text-[#213430] app-main">Registration Details</h2>
+                        <p class="text-base text-[#6C5F67] app-text mt-2">
+                            Submitted on {{ $registration->created_at?->timezone(config('app.timezone'))->format('d M Y, h:i A') ?? 'N/A' }}
+                        </p>
+                    </div>
+                    <span class="px-5 py-2 rounded-full text-base font-semibold app-text {{ $badgeClasses }}">
+                        Status: {{ $registration->status_label }}
+                    </span>
+                </div>
+
+                @if ($status === \App\Models\ProgramRegistration::STATUS_PENDING && ! $registration->assigned_case_manager_id)
+                    <div class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 app-text">
+                        This application is in the shared case manager inbox. When you save billing links, approve, or reject, it will be assigned to you.
+                    </div>
+                @endif
+                @if ($status === \App\Models\ProgramRegistration::STATUS_PENDING_FINANCE)
+                    <div class="rounded-lg border border-[#DCCFD8] bg-white px-4 py-3 text-sm text-[#6C5F67] app-text">
+                        This application is with the finance team for payment processing. You can review details but cannot change the decision from here.
+                    </div>
+                @endif
+
+                <div class="bg-white rounded-lg p-5 md:p-6 border border-[#E6D8E1]">
+                    <h3 class="text-xl font-semibold text-[#213430] app-main">Assigned Case Manager</h3>
+                    <p class="text-base text-[#213430] app-text mt-2">
+                        {{ $registration->assignedCaseManager?->profile?->full_name ?? $registration->assignedCaseManager?->email ?? 'Unassigned' }}
+                        @if ($registration->assigned_at)
+                            <span class="text-[#91848C]">• assigned {{ $registration->assigned_at->timezone(config('app.timezone'))->format('d M Y, h:i A') }}</span>
+                        @endif
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-lg p-5 md:p-6 space-y-3 border border-[#E6D8E1]">
+                        <h3 class="text-xl font-semibold text-[#213430] app-main">Applicant</h3>
+                        <div class="text-base text-[#213430] app-text leading-relaxed">
+                            <p><span class="font-medium">Name:</span> {{ $registration->full_name }}</p>
+                            <p><span class="font-medium">Email:</span> {{ $registration->email ?? 'N/A' }}</p>
+                            <p><span class="font-medium">Phone:</span> {{ $registration->phone ?? 'N/A' }}</p>
+                            <p><span class="font-medium">Date of Birth:</span> {{ $registration->dob?->format('d M Y') ?? 'N/A' }}</p>
+                            <p><span class="font-medium">Referral Type:</span> {{ $registration->referral_type === 'facility' ? 'Healthcare facility referral' : 'Self referral' }}</p>
+                            <p><span class="font-medium">Treatment Facility:</span> {{ $registration->treatment_facility_name ?? 'N/A' }}</p>
+                            <p><span class="font-medium">Address:</span> {{ $registration->street_address ?? 'N/A' }}</p>
+                            <p><span class="font-medium">City / State:</span> {{ $registration->city ?? 'N/A' }} {{ $registration->state ? ', ' . $registration->state : '' }}</p>
+                            <p><span class="font-medium">Postal Code:</span> {{ $registration->postal_code ?? 'N/A' }}</p>
+                            <p><span class="font-medium">Username:</span> {{ $registration->username }}</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-5 md:p-6 space-y-3 border border-[#E6D8E1]">
+                        <h3 class="text-xl font-semibold text-[#213430] app-main">Program</h3>
+                        <div class="text-base text-[#213430] app-text leading-relaxed">
+                            <p><span class="font-medium">Program Title:</span> {{ $registration->program->title ?? 'N/A' }}</p>
+                            <p><span class="font-medium">Medical Condition:</span> {{ $registration->medical_condition ?? 'N/A' }}</p>
+                            <p><span class="font-medium">Assistance Type:</span> {{ $registration->assistance_type ?? 'N/A' }}</p>
+                        </div>
+                        <div class="mt-3">
+                            <h4 class="font-medium text-[#213430] text-base mb-1 app-text">Programs Applied</h4>
+                            <p class="text-base text-[#213430] app-text leading-relaxed">
+                                {{ collect($registration->programs_applied ?? [])->map(fn ($p) => $programLabels[$p] ?? $p)->filter()->implode(', ') ?: 'N/A' }}
+                            </p>
+                            <p class="text-base text-[#213430] app-text"><span class="font-medium">Quarter:</span>
+                                {{ $quarterLabels[$registration->quarter_applied] ?? 'N/A' }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg p-5 md:p-6 space-y-4 border border-[#E6D8E1]">
+                    <h3 class="text-xl font-semibold text-[#213430] app-main">Application Details</h3>
+                    <p class="text-base text-[#213430] app-text"><span class="font-medium">Active Treatment:</span> {{ $registration->active_treatment ? 'Yes' : 'No' }}</p>
+                    <p class="text-base text-[#213430] app-text"><span class="font-medium">Family History:</span> {{ $registration->family_history ?? 'N/A' }}</p>
+                    <p class="text-base text-[#213430] app-text"><span class="font-medium">Received Assistance Before:</span> {{ $registration->assistance_history ?? 'N/A' }}</p>
+                    <p class="text-base text-[#213430] app-text"><span class="font-medium">Heard About Us:</span> {{ $registration->heard_about ?? 'N/A' }}</p>
+                    <p class="text-base text-[#213430] app-text"><span class="font-medium">Proof of Income Status:</span>
+                        {{ collect($registration->proof_of_income_status ?? [])->map(fn ($p) => $incomeLabels[$p] ?? $p)->filter()->implode(', ') ?: 'N/A' }}</p>
+                    <div>
+                        <h4 class="font-medium text-[#213430] text-base mb-1 app-text">Story</h4>
+                        <div class="max-h-96 overflow-y-auto overflow-x-hidden rounded border border-[#E6D8E1] bg-[#FDF7FB] px-3 py-2 break-words">
+                            <p class="text-base text-[#6C5F67] app-text whitespace-pre-line leading-relaxed">{{ $registration->story ?? 'No story provided.' }}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-[#213430] text-base mb-1 app-text">Authorization</h4>
+                        <p class="text-base text-[#213430] app-text">{{ $registration->authorization_allow ? 'Consent granted' : 'Consent not granted' }}</p>
+                        @if ($registration->authorization_allow && !empty($registration->authorization_permissions))
+                            <ul class="list-disc ml-5 text-base text-[#6C5F67] app-text leading-relaxed">
+                                @foreach ($registration->authorization_permissions as $perm)
+                                    <li>{{ $authorizationLabels[$perm] ?? ucfirst(str_replace('_', ' ', $perm)) }}</li>
+                                @endforeach
+                            </ul>
+                        @endif
+                        <p class="text-base text-[#213430] app-text"><span class="font-medium">Breast cancer stage:</span> {{ $registration->breast_cancer_stage ?? 'N/A' }}</p>
+                        <p class="text-base text-[#213430] app-text"><span class="font-medium">Ethnicity:</span> {{ $registration->ethnicity ?: '—' }}</p>
+                        <p class="text-base text-[#213430] app-text mt-2"><span class="font-medium">Billing Details:</span> {{ $registration->billing_details ?? 'N/A' }}</p>
+                        @if (is_array($registration->patient_bill_line_items) && count($registration->patient_bill_line_items) > 0)
+                            <div class="mt-4 overflow-x-auto">
+                                <p class="font-medium text-[#213430] mb-2">Applicant bill table</p>
+                                <p class="text-xs text-[#91848C] mb-2">Note: To ensure proper processing, the bill must be in the patient’s name to qualify for assistance.</p>
+                                <table class="min-w-full text-sm border border-[#E6D8E1] rounded-md">
+                                    <thead class="bg-[#F3E8EF]"><tr>
+                                        <th class="p-2 text-left">Service Provider Name</th>
+                                        <th class="p-2 text-left">Bill Payment Link(s)</th>
+                                        <th class="p-2 text-left">Amount Due</th>
+                                        <th class="p-2 text-left">Type of Support Expenses</th>
+                                        <th class="p-2 text-left">Provider Contact Information</th>
+                                        <th class="p-2 text-left">Account Number</th>
+                                        <th class="p-2 text-left">Notes (optional)</th>
+                                    </tr></thead>
+                                    <tbody>
+                                        @foreach ($registration->patient_bill_line_items as $row)
+                                            <tr class="border-t border-[#E6D8E1]">
+                                                <td class="p-2">{{ $row['name'] ?? '' }}</td>
+                                                <td class="p-2 break-all">{{ $row['url'] ?? '' }}</td>
+                                                <td class="p-2">{{ $row['amount'] ?? '' }}</td>
+                                                <td class="p-2">{{ $row['support_expense_type'] ?? '' }}</td>
+                                                <td class="p-2">{{ $row['provider_contact'] ?? '' }}</td>
+                                                <td class="p-2">{{ $row['account_number'] ?? '' }}</td>
+                                                <td class="p-2">{{ $row['notes'] ?? '' }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
+                        <div class="text-base text-[#213430] app-text">
+                            <span class="font-medium">Signature:</span>
+                            @if ($registration->signature)
+                                <div class="mt-2">
+                                    <img src="{{ storage_url($registration->signature) }}" alt="Signature" class="h-24 object-contain">
+                                </div>
+                            @else
+                                <p class="text-[#6C5F67]">N/A</p>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                @php
+                    $billingUrlRows = old('billing_urls');
+                    if (! is_array($billingUrlRows)) {
+                        $billingUrlRows = collect(preg_split('/\r\n|\r|\n/', (string) ($registration->payment_links ?? '')))
+                            ->map(fn ($l) => trim((string) $l))
+                            ->filter()
+                            ->values()
+                            ->all();
+                    }
+                    if (count($billingUrlRows) === 0) {
+                        $billingUrlRows = [''];
+                    }
+                @endphp
+                <div class="bg-white rounded-lg p-5 md:p-6 border border-[#E6D8E1]">
+                    <h3 class="text-xl font-semibold text-[#213430] app-main mb-2">Billing payment links</h3>
+                    <p class="text-base text-[#6C5F67] app-text mb-4">
+                        @if ($status === \App\Models\ProgramRegistration::STATUS_PENDING)
+                            Enter payment portal URLs shared by the applicant (one per row). Saved links are visible to finance and administrators.
+                        @else
+                            Saved links are visible to finance and administrators.
+                        @endif
+                    </p>
+                    @if ($status === \App\Models\ProgramRegistration::STATUS_PENDING)
+                    <form method="POST" action="{{ route('case_manager.program_registrations.billing_payment_links', $registration) }}" class="space-y-4" id="billing-links-form">
+                        @csrf
+                        <div id="billing-url-rows" class="space-y-2">
+                            @foreach ($billingUrlRows as $rowUrl)
+                                <div class="billing-url-row flex flex-wrap gap-2 items-center">
+                                    <input type="text"
+                                        name="billing_urls[]"
+                                        value="{{ $rowUrl }}"
+                                        placeholder="https://payment.example.org/patient"
+                                        autocomplete="off"
+                                        class="flex-1 min-w-[12rem] rounded-md border bg-white px-3 py-2 text-base text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-[#9E2469]/30 {{ $errors->has('billing_urls') ? 'border-red-400 ring-1 ring-red-400' : 'border-[#DCCFD8]' }}">
+                                    <button type="button"
+                                        class="billing-url-remove shrink-0 px-3 py-2 rounded-md border border-[#91848C] text-[#213430] text-sm hover:bg-[#FAF7FA] disabled:opacity-40 disabled:cursor-not-allowed"
+                                        title="Remove this row">
+                                        Remove
+                                    </button>
+                                </div>
+                            @endforeach
+                        </div>
+                        @error('billing_urls')
+                            <p class="text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                        <div class="flex flex-wrap items-center gap-3 pt-1">
+                            <button type="button" id="billing-url-add"
+                                class="px-4 py-2 rounded-md border border-[#9E2469] text-[#9E2469] text-sm font-medium hover:bg-[#FDE8F3]">
+                                Add link
+                            </button>
+                            <button type="submit" class="bg-[#B3477D] text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-[#9E2469]">
+                                Save billing links
+                            </button>
+                        </div>
+                    </form>
+                    @endif
+                    @if (filled($registration->payment_links))
+                        <div class="mt-5 rounded-lg border border-[#E6D8E1] bg-[#FAF7FA] p-4">
+                            <p class="text-xs font-semibold text-[#213430] mb-2 app-text">Open links (preview)</p>
+                            <div class="text-base text-[#213430] app-text">
+                                {!! \App\Support\BillingPaymentLinks::toHtml($registration->payment_links) !!}
+                            </div>
+                        </div>
+                    @elseif ($status !== \App\Models\ProgramRegistration::STATUS_PENDING)
+                        <p class="text-sm text-[#91848C]">No billing links were saved before this application moved to finance.</p>
+                    @endif
+                </div>
+
+                @if ($status === \App\Models\ProgramRegistration::STATUS_PENDING)
+                <template id="billing-url-row-template">
+                    <div class="billing-url-row flex flex-wrap gap-2 items-center">
+                        <input type="text"
+                            name="billing_urls[]"
+                            value=""
+                            placeholder="https://payment.example.org/patient"
+                            autocomplete="off"
+                            class="flex-1 min-w-[12rem] rounded-md border border-[#DCCFD8] bg-white px-3 py-2 text-base text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-[#9E2469]/30">
+                        <button type="button"
+                            class="billing-url-remove shrink-0 px-3 py-2 rounded-md border border-[#91848C] text-[#213430] text-sm hover:bg-[#FAF7FA] disabled:opacity-40 disabled:cursor-not-allowed"
+                            title="Remove this row">
+                            Remove
+                        </button>
+                    </div>
+                </template>
+                @endif
+
+                <div class="bg-white rounded-lg p-5 md:p-6 border border-[#E6D8E1]">
+                    <h3 class="text-xl font-semibold text-[#213430] app-main mb-4">Supporting Documents</h3>
+                    <div class="space-y-4 text-base app-text">
+                        <div class="flex items-center justify-between gap-3 bg-[#FAF7FA] rounded-md px-4 py-3">
+                            <span class="text-[#213430] font-medium">Treatment Verification Letter</span>
+                            @if ($registration->treatment_letter)
+                                <a href="{{ $registration->treatment_letter['url'] }}" target="_blank" class="inline-flex items-center text-[#B3477D] font-semibold hover:underline">Preview</a>
+                            @else
+                                <span class="text-[#6C5F67]">Not provided</span>
+                            @endif
+                        </div>
+                        <div class="bg-[#FAF7FA] rounded-md px-4 py-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[#213430] font-medium">Bill Statements</span>
+                                @if (!empty($registration->bill_statements))
+                                    <span class="text-sm text-[#6C5F67]">{{ count($registration->bill_statements) }} file(s)</span>
+                                @endif
+                            </div>
+                            @if (!empty($registration->bill_statements))
+                                <ul class="mt-2 space-y-1">
+                                    @foreach ($registration->bill_statements as $bill)
+                                        <li class="flex items-center justify-between gap-2">
+                                            <span class="text-[#213430] truncate">{{ $bill['filename'] }}</span>
+                                            <a href="{{ $bill['url'] }}" target="_blank" class="inline-flex items-center text-[#B3477D] font-semibold hover:underline">Preview</a>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @else
+                                <p class="text-[#6C5F67] text-base">No bill statements uploaded.</p>
+                            @endif
+                        </div>
+                        <div class="bg-[#FAF7FA] rounded-md px-4 py-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[#213430] font-medium">Proof of Income Documents</span>
+                                @if (!empty($registration->income_documents))
+                                    <span class="text-sm text-[#6C5F67]">{{ count($registration->income_documents) }} file(s)</span>
+                                @endif
+                            </div>
+                            @if (!empty($registration->income_documents))
+                                <ul class="mt-2 space-y-1">
+                                    @foreach ($registration->income_documents as $income)
+                                        <li class="flex items-center justify-between gap-2">
+                                            <span class="text-[#213430] truncate">{{ $income['filename'] }}</span>
+                                            <a href="{{ $income['url'] }}" target="_blank" class="inline-flex items-center text-[#B3477D] font-semibold hover:underline">Preview</a>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @else
+                                <p class="text-[#6C5F67] text-base">No income documents uploaded.</p>
+                            @endif
+                        </div>
+                        @if (!empty($registration->documents))
+                            <div class="bg-[#FAF7FA] rounded-md px-4 py-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[#213430] font-medium">Additional Documents</span>
+                                    <span class="text-sm text-[#6C5F67]">{{ count($registration->documents) }} file(s)</span>
+                                </div>
+                                <ul class="mt-2 space-y-1">
+                                    @foreach ($registration->documents as $document)
+                                        <li class="flex items-center justify-between gap-2">
+                                            <span class="text-[#213430] truncate">{{ $document['filename'] }}</span>
+                                            <a href="{{ $document['url'] }}" target="_blank"
+                                                class="inline-flex items-center text-[#B3477D] font-semibold hover:underline">Preview</a>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                @if ($registration->status === \App\Models\ProgramRegistration::STATUS_PENDING)
+                    <div class="bg-white rounded-lg p-5 md:p-6 space-y-6 border border-[#E6D8E1]">
+                        <h3 class="text-xl font-semibold text-[#213430] app-main">Patient Support Coordinator Review</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <form method="POST" action="{{ route('case_manager.program_registrations.approve', $registration) }}" class="bg-[#F8F2F6] rounded-lg p-4 space-y-3 border border-[#E6D8E1]">
+                                @csrf
+                                <h4 class="font-semibold text-[#213430] app-main">Approve Application</h4>
+                                <p class="text-base text-[#6C5F67] app-text">Optional: add a short note for the applicant.</p>
+                                <textarea name="note" rows="3" class="w-full px-3 py-2 rounded-md border border-[#DCCFD8] bg-white text-base focus:outline-none focus:ring-2 focus:ring-[#9E2469]" placeholder="Optional note for applicant"></textarea>
+                                <div>
+                                    <label for="internal_note_for_finance" class="block text-sm font-semibold text-[#213430] app-main">Internal note for finance</label>
+                                    <p class="text-sm text-[#6C5F67] app-text mb-2">Staff only — not shown to the applicant.</p>
+                                    <textarea id="internal_note_for_finance" name="internal_note_for_finance" rows="3" maxlength="5000"
+                                        class="w-full px-3 py-2 rounded-md border border-[#E8D9A8] bg-[#FFFDF5] text-base focus:outline-none focus:ring-2 focus:ring-[#9E2469]"
+                                        placeholder="Context, billing details, or instructions for the finance team">{{ old('internal_note_for_finance') }}</textarea>
+                                </div>
+                                <button type="submit"
+                                    class="w-full inline-flex justify-center items-center px-4 py-3 bg-[#20B354] text-white rounded-md text-base font-semibold hover:bg-[#1A9444] transition">
+                                    Approve Request
+                                </button>
+                            </form>
+
+                            <form method="POST" action="{{ route('case_manager.program_registrations.reject', $registration) }}" class="bg-[#F8F2F6] rounded-lg p-4 space-y-3 border border-[#E6D8E1]">
+                                @csrf
+                                <h4 class="font-semibold text-[#213430] app-main">Reject Application</h4>
+                                <p class="text-base text-[#6C5F67] app-text">Provide a short reason to keep for the record.</p>
+                                <textarea name="note" rows="3" required class="w-full px-3 py-2 rounded-md border border-[#DCCFD8] bg-white text-base focus:outline-none focus:ring-2 focus:ring-[#9E2469]" placeholder="Reason for rejection"></textarea>
+                                <button type="submit"
+                                    class="w-full inline-flex justify-center items-center px-4 py-3 bg-[#B32020] text-white rounded-md text-base font-semibold hover:bg-[#8F1A1A] transition">
+                                    Reject Request
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                @else
+                    <div class="bg-white rounded-lg p-5 md:p-6 space-y-3 text-base text-[#213430] app-text border border-[#E6D8E1]">
+                        <h3 class="text-xl font-semibold text-[#213430] app-main">Review Summary</h3>
+                        <p><span class="font-medium">Reviewed By:</span> {{ $registration->reviewer?->profile->full_name ?? $registration->reviewer?->email ?? 'N/A' }}</p>
+                        <p><span class="font-medium">Reviewed At:</span> {{ $registration->reviewed_at?->timezone(config('app.timezone'))->format('d M Y, h:i A') ?? 'N/A' }}</p>
+                        @if ($registration->review_note)
+                            <div>
+                                <span class="font-medium">Review Note:</span>
+                                <p class="text-[#6C5F67] whitespace-pre-line app-text">{{ $registration->review_note }}</p>
+                            </div>
+                        @endif
+                    </div>
+
+                    @include('partials.program_registration_internal_notes', ['registration' => $registration])
+                @endif
+
+                <div class="flex justify-between items-center pt-5 border-t border-[#DCCFD8]">
+                    <a href="{{ route('case_manager.program_registrations.index', ['status' => $status === 'pending' ? 'pending' : 'all']) }}"
+                        class="inline-flex items-center gap-2 text-base text-[#6C5F67] hover:text-[#213430] app-text">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 19l-7-7 7-7" />
+                        </svg>
+                        Back to list
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+@endsection
+
+@push('scripts')
+    <script>
+        (function () {
+            const container = document.getElementById('billing-url-rows');
+            const template = document.getElementById('billing-url-row-template');
+            const addBtn = document.getElementById('billing-url-add');
+            if (!container || !template || !addBtn) return;
+
+            function updateRemoveState() {
+                const rows = container.querySelectorAll('.billing-url-row');
+                const disable = rows.length <= 1;
+                rows.forEach(function (row) {
+                    const btn = row.querySelector('.billing-url-remove');
+                    if (btn) btn.disabled = disable;
+                });
+            }
+
+            addBtn.addEventListener('click', function () {
+                const node = template.content.firstElementChild.cloneNode(true);
+                const input = node.querySelector('input');
+                if (input) input.value = '';
+                container.appendChild(node);
+                updateRemoveState();
+                if (input) input.focus();
+            });
+
+            container.addEventListener('click', function (e) {
+                const btn = e.target.closest('.billing-url-remove');
+                if (!btn || btn.disabled) return;
+                const row = btn.closest('.billing-url-row');
+                if (!row || container.querySelectorAll('.billing-url-row').length <= 1) return;
+                row.remove();
+                updateRemoveState();
+            });
+
+            updateRemoveState();
+        })();
+    </script>
+@endpush

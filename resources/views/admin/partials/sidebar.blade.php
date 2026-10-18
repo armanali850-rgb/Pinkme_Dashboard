@@ -1,0 +1,228 @@
+<!-- Mobile Sidebar -->
+<div class="mobile-sidebar" id="mobileSidebar">
+    <!-- Close Button -->
+    <button class="close-btn" id="closeBtn">
+        <img src="{{ asset('images/cross-white.svg') }}" alt="Close" />
+    </button>
+
+    <!-- Logo -->
+    <div class="mobile-logo">
+        <img src="{{ asset('images/pink_me_logo.png') }}" alt="PINK ME Logo" />
+    </div>
+
+    <!-- Menu -->
+    <ul class="mobile-menu">
+        <li class="{{ request()->is('admin/dashboard') ? 'active' : '' }}">
+            <a href="{{ route('admin.dashboard') }}"><img
+                    src="{{ request()->is('admin/dashboard') ? asset('images/Dashboard-svg.svg') : asset('images/App-Dash.svg') }}"
+                    alt="" />Dashboard</a>
+        </li>
+        {{-- <li class="{{ request()->is('admin/applications') ? 'active' : '' }}">
+            <a href="{{ route('admin.applications') }}"><img
+                    src="{{ request()->is('admin/applications') ? asset('images/App-app.svg') : asset('images/My_Application.svg') }}"
+                    alt="" />Applications</a>
+        </li> --}}
+        <li class="{{ request()->is('admin/registrations*') ? 'active' : '' }}">
+            <a href="{{ route('admin.registrations.index') }}">
+                <img src="{{ request()->is('admin/registrations*') ? asset('images/document-pink.svg') : asset('images/document.svg') }}"
+                     alt="Applications" />
+                Applications
+            </a>
+        </li>
+        <li class="{{ request()->is('admin/reviewers*') ? 'active' : '' }}">
+            <a href="{{ route('admin.reviewers') }}"><img
+                    src="{{ request()->is('admin/reviewers*') ? asset('images/review-pink.svg') : asset('images/review.svg') }}"
+                    alt="Case Managers" /><span
+                    style="white-space: normal; line-height: 1.25;">Patient Support<br />Coordinator</span></a>
+        </li>
+        <li class="{{ request()->is('admin/finance-users*') ? 'active' : '' }}">
+            <a href="{{ route('admin.finance-users.index') }}"><img
+                    src="{{ request()->is('admin/finance-users*') ? asset('images/review-pink.svg') : asset('images/review.svg') }}"
+                    alt="Finance Users" />Finance & Grant Team</a>
+        </li>
+        <li class="{{ request()->routeIs('admin.staff_chats') ? 'active' : '' }}">
+            <a href="{{ route('admin.staff_chats') }}"><img
+                    src="{{ request()->routeIs('admin.staff_chats') ? asset('images/chat-svg-pink.svg') : asset('images/chat.svg') }}"
+                    alt="Finance chat" />Financial Support Chat</a>
+        </li>
+        <li class="{{ request()->is('admin/patients') ? 'active' : '' }}">
+            <a href="{{ route('admin.patients') }}"><img
+                    src="{{ request()->is('admin/patients') ? asset('images/patient-pink.svg') : asset('images/patient.svg') }}"
+                    alt="" />PINK “ME” Friends</a>
+        </li>
+        {{-- Sponsors - commented: sponsor not important for now
+        <li class="{{ request()->is('admin/sponsors*') ? 'active' : '' }}">
+            <a href="{{ route('admin.sponsors') }}"><img
+                    src="{{ request()->is('admin/sponsors*') ? asset('images/Sponsor-pink.svg') : asset('images/Sponsor.svg') }}"
+                    alt="" />Sponsors</a>
+        </li>
+        --}}
+        <li class="{{ request()->is('admin/programs-events') || request()->is('admin/programs*') ? 'active' : '' }}">
+            <a href="{{ route('admin.programs-events') }}"><img
+                    src="{{ request()->is('admin/programs-events') || request()->is('admin/programs*') ? asset('images/program-svg.svg') : asset('images/program.svg') }}"
+                    alt="" />Programs</a>
+        </li>
+        {{-- Event Registrations - commented: sponsor-related, sponsor not wanted for now
+        <li class="{{ request()->is('admin/events-registrations*') ? 'active' : '' }}">
+            <a href="{{ route('events.registrations.index') }}"><img
+                    src="{{ request()->is('admin/events-registrations*') ? asset('images/document-pink.svg') : asset('images/document.svg') }}"
+                    alt="" />Event Registrations</a>
+        </li>
+        --}}
+        {{-- Webinars - commented: sponsor/webinars not important for now
+        <li class="{{ request()->is('admin/webinars*') ? 'active' : '' }}">
+            <a href="{{ route('admin.webinars.index') }}"><img
+                    src="{{ request()->is('admin/webinars*') ? asset('images/program-svg.svg') : asset('images/program.svg') }}"
+                    alt="" />Webinars</a>
+        </li>
+        --}}
+        <li class="{{ request()->is('admin/settings') ? 'active' : '' }}">
+            <a href="{{ route('admin.settings') }}"><img
+                    src="{{ request()->is('admin/settings') ? asset('images/setting-pink.svg') : asset('images/setting.svg') }}"
+                    alt="" />Setting</a>
+        </li>
+        <li class="{{ request()->routeIs('admin.guide') ? 'active' : '' }}">
+            <a href="{{ route('admin.guide') }}">
+                <img src="{{ request()->routeIs('admin.guide') ? asset('images/FAQ-pink.svg') : asset('images/FAQ.svg') }}"
+                     alt="Tutorial" />Tutorial</a>
+        </li>
+    </ul>
+</div>
+
+
+{{-- Desktop Sidebar --}}
+<div class="box relative">
+    <div class="navigation">
+        <ul>
+            <li><a href="#"><img src="{{ asset('images/pink_me_logo.png') }}" alt="Logo"></a></li>
+            <li class="{{ request()->is('admin/dashboard') ? 'hovered' : '' }}">
+                <a href="{{ route('admin.dashboard') }}">
+                    <span class="icon"><img
+                            src="{{ request()->is('admin/dashboard') ? asset('images/Dashboard-svg.svg') : asset('images/App-Dash.svg') }}"
+                            alt="Dashboard Icon" class="w-5 h-5" /></span>
+                    <span class="title">Dashboard</span>
+                </a>
+            </li>
+            {{-- <li
+                class="{{ request()->is('admin/applications*') || request()->routeIs('admin.viewApplication') ? 'hovered' : '' }}">
+                <a href="{{ route('admin.applications') }}">
+                    <span class="icon">
+                        <img src="{{ request()->is('admin/applications*') || request()->routeIs('admin.viewApplication')
+                            ? asset('images/App-app.svg')
+                            : asset('images/My_Application.svg') }}"
+                            class="w-5 h-5" />
+                    </span>
+                    <span class="title">Applications</span>
+                </a>
+            </li> --}}
+            <li class="{{ request()->is('admin/registrations*') ? 'hovered' : '' }}">
+                <a href="{{ route('admin.registrations.index') }}">
+                    <span class="icon"><img
+                            src="{{ request()->is('admin/registrations*') ? asset('images/document-pink.svg') : asset('images/document.svg') }}"
+                            class="w-5 h-5" alt="Applications" /></span>
+                    <span class="title">Applications</span>
+                </a>
+            </li>
+            <li class="{{ request()->is('admin/reviewers*') ? 'hovered' : '' }}">
+                <a href="{{ route('admin.reviewers') }}">
+                    <span class="icon"><img
+                            src="{{ request()->is('admin/reviewers*') ? asset('images/review-pink.svg') : asset('images/review.svg') }}"
+                            class="w-5 h-5" alt="Case Managers" /></span>
+                    <span class="title"
+                        style="white-space: normal; line-height: 1.25; height: auto; min-height: 60px; padding: 12px 10px; overflow-wrap: break-word; word-break: break-word; min-width: 0; flex: 1 1 auto;">Patient Support<br />Coordinator</span>
+                </a>
+            </li>
+            <li class="{{ request()->is('admin/finance-users*') ? 'hovered' : '' }}">
+                <a href="{{ route('admin.finance-users.index') }}">
+                    <span class="icon"><img
+                            src="{{ request()->is('admin/finance-users*') ? asset('images/review-pink.svg') : asset('images/review.svg') }}"
+                            class="w-5 h-5" alt="Finance Users" /></span>
+                    <span class="title">Finance & Grant Team</span>
+                </a>
+            </li>
+            <li class="{{ request()->routeIs('admin.staff_chats') ? 'hovered' : '' }}">
+                <a href="{{ route('admin.staff_chats') }}">
+                    <span class="icon"><img
+                            src="{{ request()->routeIs('admin.staff_chats') ? asset('images/chat-svg-pink.svg') : asset('images/chat.svg') }}"
+                            class="w-5 h-5" alt="Finance chat" /></span>
+                    <span class="title">Financial Support Chat</span>
+                </a>
+            </li>
+            <li class="{{ request()->is('admin/patients') ? 'hovered' : '' }}">
+                <a href="{{ route('admin.patients') }}">
+                    <span class="icon"><img
+                            src="{{ request()->is('admin/patients') ? asset('images/patient-pink.svg') : asset('images/patient.svg') }}"
+                            class="w-5 h-5" /></span>
+                    <span class="title">PINK “ME” Friends</span>
+                </a>
+            </li>
+            {{-- Sponsors - commented: sponsor not important for now
+            <li class="{{ request()->is('admin/sponsors*') ? 'hovered' : '' }}">
+                <a href="{{ route('admin.sponsors') }}">
+                    <span class="icon"><img
+                            src="{{ request()->is('admin/sponsors*') ? asset('images/Sponsor-pink.svg') : asset('images/Sponsor.svg') }}"
+                            class="w-5 h-5" /></span>
+                    <span class="title">Sponsors</span>
+                </a>
+            </li>
+            --}}
+            <li
+                class="{{ request()->is('admin/programs-events') || request()->is('admin/programs*') ? 'hovered' : '' }}">
+                <a href="{{ route('admin.programs-events') }}">
+                    <span class="icon"><img
+                            src="{{ request()->is('admin/programs-events') || request()->is('admin/programs*') ? asset('images/program-svg.svg') : asset('images/program.svg') }}"
+                            class="w-5 h-5" /></span>
+                    <span class="title">Programs</span>
+                </a>
+            </li>
+            {{-- Event Registrations - commented: sponsor-related, sponsor not wanted for now
+            <li class="{{ request()->is('admin/events-registrations*') ? 'hovered' : '' }}">
+                <a href="{{ route('events.registrations.index') }}">
+                    <span class="icon"><img
+                            src="{{ request()->is('admin/events-registrations*') ? asset('images/document-pink.svg') : asset('images/document.svg') }}"
+                            class="w-5 h-5" /></span>
+                    <span class="title">Event Registrations</span>
+                </a>
+            </li>
+            --}}
+            {{-- Webinars - commented: sponsor/webinars not important for now
+            <li class="{{ request()->is('admin/webinars*') ? 'hovered' : '' }}">
+                <a href="{{ route('admin.webinars.index') }}">
+                    <span class="icon"><img
+                            src="{{ request()->is('admin/webinars*') ? asset('images/program-svg.svg') : asset('images/program.svg') }}"
+                            class="w-5 h-5" /></span>
+                    <span class="title">Webinars</span>
+                </a>
+            </li>
+            --}}
+            <li class="{{ request()->is('admin/settings') ? 'hovered' : '' }}">
+                <a href="{{ route('admin.settings') }}">
+                    <span class="icon"><img
+                            src="{{ request()->is('admin/settings') ? asset('images/setting-pink.svg') : asset('images/setting.svg') }}" /></span>
+                    <span class="title">Settings</span>
+                </a>
+            </li>
+            <li class="{{ request()->routeIs('admin.guide') ? 'hovered' : '' }}">
+                <a href="{{ route('admin.guide') }}">
+                    <span class="icon"><img
+                            src="{{ request()->routeIs('admin.guide') ? asset('images/FAQ-pink.svg') : asset('images/FAQ.svg') }}" /></span>
+                    <span class="title">Tutorial</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <div class="sign-out">
+        <a href="{{ route('logout') }}"
+           onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+            <span class="icon">
+                <img src="{{ asset('images/signout.svg') }}" alt="Sign Out" />
+            </span>
+            <span class="title">Sign Out</span>
+        </a>
+        
+        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+            @csrf
+        </form>
+
+    </div>
+</div>

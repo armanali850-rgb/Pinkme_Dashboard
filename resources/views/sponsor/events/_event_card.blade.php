@@ -1,0 +1,169 @@
+﻿@php
+    use App\Support\EventHighlightFormatter;
+    use Carbon\Carbon;
+    use Illuminate\Support\Facades\Storage;
+    use Illuminate\Support\Str;
+
+    $image = asset('public/images/' . $eventImages[$loopIndex % count($eventImages)]);
+    $descriptionHtml = $event->description
+        ? strip_tags($event->description, '<p><br><strong><em><u><ol><ul><li><a><span><div><blockquote>')
+        : null;
+    $descriptionText = trim(strip_tags($descriptionHtml ?? ''));
+    $descriptionSummary = $descriptionText !== '' ? $descriptionText : 'Details will be announced soon.';
+    $eventHighlightsHtml = EventHighlightFormatter::format($event->event_highlights);
+    $primarySponsor = $event->primary_sponsor;
+    $primarySponsorProfile = optional($primarySponsor)->profile;
+    $primarySponsorDetail = optional($primarySponsor)->sponsorDetail;
+    $primarySponsorName =
+        $primarySponsorDetail->company_name ??
+        ($primarySponsorProfile->full_name ?? ($primarySponsor->email ?? 'Sponsor to be announced'));
+    $primarySponsorPhone =
+        $primarySponsorDetail->company_phone ?? ($primarySponsorProfile->phone ?? 'Phone unavailable');
+    $primarySponsorEmail = $primarySponsorDetail->company_email ?? ($primarySponsor->email ?? 'Email unavailable');
+    $primarySponsorLogo =
+        $primarySponsorDetail && $primarySponsorDetail->logo
+            ? Storage::url($primarySponsorDetail->logo)
+            : asset('public/images/brand.png');
+    $primarySponsorAbout =
+        $primarySponsorDetail && $primarySponsorDetail->company_type
+            ? 'A ' . strtolower($primarySponsorDetail->company_type) . ' supporting patient care initiatives.'
+            : 'Committed supporters partnering with us to impact more lives.';
+    $totalSponsors = $event->sponsors->count();
+    $totalRaised = number_format($event->total_sponsorship_amount ?? 0, 2);
+    $location = $event->location ?: 'Location to be announced';
+    $status = $event->status ?? 'upcoming';
+    $timeLabel = $event->time_label ?? Carbon::parse($event->date)->format('g:i A');
+@endphp
+
+<div class="event-entry" data-event-status="{{ $status }}" data-event-type="{{ $event->payment_type ?? 'flexible' }}">
+    <div class="bg-[#F3E8EF] rounded-lg p-4 mb-4 flex items-center justify-between md:flex hidden">
+        <div class="flex items-center">
+            <div
+                class="flex flex-col items-center justify-center w-20 h-20 border-2 border-pink rounded-lg mr-4 bg-[#FFF7FC]">
+                <span class="text-sm text-pink">{{ $event->month_label }}</span>
+                <span class="text-4xl font-bold text-pink">{{ $event->day_label }}</span>
+            </div>
+            <div class="w-20 h-20 rounded-lg overflow-hidden mr-4">
+                <img src="{{ $image }}" alt="{{ $event->title }}" class="w-full h-full object-cover" />
+            </div>
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <h3 class="text-xl font-semibold text-[#213430] program-h">{{ $event->title }}</h3>
+                    <span class="inline-flex items-center rounded-full bg-[#9E2469] px-3 py-1 text-xs font-medium text-white">
+                        {{ $event->payment_type === 'full' ? 'Full Sponsorship' : 'Flexible Sponsorship' }}
+                    </span>
+                </div>
+                <p class="text-sm text-[#91848C] program-p">{{ Str::limit($descriptionSummary, 150) }}</p>
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <button type="button"
+                class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#9E2469] hover:border-none hover:text-white py-3 px-6 rounded-lg program-btn"
+                onclick="openModal(this)" data-title="{{ e($event->title) }}"
+                data-description="{{ e($descriptionSummary) }}"
+                data-description-html="{{ e($descriptionHtml ?? '') }}"
+                data-date="{{ e($event->date_label) }}" data-time="{{ e($timeLabel) }}"
+                data-location="{{ e($location) }}" data-image="{{ $image }}"
+                data-sponsor-name="{{ e($primarySponsorName) }}" data-sponsor-phone="{{ e($primarySponsorPhone) }}"
+                data-sponsor-email="{{ e($primarySponsorEmail) }}" data-sponsor-logo="{{ $primarySponsorLogo }}"
+                data-sponsor-about="{{ e($primarySponsorAbout) }}" data-total-sponsors="{{ $totalSponsors }}"
+                data-total-raised="{{ $totalRaised }}" data-status="{{ $status }}"
+                data-highlights="{{ e($eventHighlightsHtml ?? '') }}"
+                data-event-id="{{ $event->id }}">
+                Quick View
+            </button>
+            @if ($event->isSponsorRegistered(auth()->id()))
+                <a href="{{ route('sponsor.events.show', $event) }}"
+                    style="background: #9E2469; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; transition: background 0.3s ease;"
+                    onmouseover="this.style.background='linear-gradient(to right, #B52D75, #B02A72)'"
+                    onmouseout="this.style.background='linear-gradient(to right, #9E2469, #B52D75)'">
+                    View Registration
+                </a>
+            @elseif ($event->isRegistrationOpen())
+                <button type="button"
+                    onclick="typeof openRegisterModal === 'function' && openRegisterModal(this)"
+                    data-register-event-id="{{ $event->id }}"
+                    data-register-title="{{ e($event->title) }}"
+                    data-register-payment-type="{{ $event->payment_type ?? 'flexible' }}"
+                    data-register-remaining="{{ $event->remaining_funding ?? 0 }}"
+                    data-register-funding-goal="{{ $event->funding_goal ?? 0 }}"
+                    style="background: #9E2469; color: white; padding: 12px 24px; border-radius: 8px; border: none; cursor: pointer; display: inline-block; transition: background 0.3s ease;"
+                    onmouseover="this.style.background='linear-gradient(to right, #B52D75, #B02A72)'"
+                    onmouseout="this.style.background='linear-gradient(to right, #9E2469, #B52D75)'">
+                    Register Now
+                </button>
+            @else
+                <a href="{{ route('sponsor.events.show', $event) }}"
+                    class="bg-gray-400 text-white py-3 px-6 rounded-lg program-btn">
+                    View Details
+                </a>
+            @endif
+        </div>
+    </div>
+
+    <div class="bg-[#F3E8EF] rounded-lg p-3 mb-4 flex items-center justify-between md:hidden flex">
+        <div class="flex flex-col gap-2">
+            <div class="w-[80px] h-[80px] rounded-lg overflow-hidden mr-4">
+                <img src="{{ $image }}" alt="{{ $event->title }}" class="w-full h-full object-cover" />
+            </div>
+            <div
+                class="flex flex-col items-center justify-center w-[80px] h-[60px] border-2 border-pink rounded-lg mr-4 bg-[#FFF7FC]">
+                <span class="text-sm text-pink">{{ $event->month_label }}</span>
+                <span class="text-4xl font-bold text-pink">{{ $event->day_label }}</span>
+            </div>
+        </div>
+        <div class="flex flex-col gap-1 text-left">
+            <div class="flex items-center gap-2">
+                <h3 class="text-[15px] font-semibold text-[#213430]">{{ $event->title }}</h3>
+                <span class="inline-flex items-center rounded-full bg-[#9E2469] px-2 py-0.5 text-[10px] font-semibold text-white uppercase tracking-wide">
+                    {{ $event->payment_type === 'full' ? 'Full' : 'Flexible' }}
+                </span>
+            </div>
+            <p class="text-[13px] font-light text-[#91848C]">{{ Str::limit($descriptionSummary, 110) }}</p>
+            <div class="flex gap-2 flex-col">
+                <button type="button"
+                    class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#9E2469] hover:text-white hover:border-none py-2 px-4 rounded-lg text-sm"
+                    onclick="openModal(this)" data-title="{{ e($event->title) }}"
+                    data-description="{{ e($descriptionSummary) }}"
+                    data-description-html="{{ e($descriptionHtml ?? '') }}"
+                    data-date="{{ e($event->date_label) }}"
+                    data-time="{{ e($timeLabel) }}" data-location="{{ e($location) }}"
+                    data-image="{{ $image }}" data-sponsor-name="{{ e($primarySponsorName) }}"
+                    data-sponsor-phone="{{ e($primarySponsorPhone) }}"
+                    data-sponsor-email="{{ e($primarySponsorEmail) }}" data-sponsor-logo="{{ $primarySponsorLogo }}"
+                    data-sponsor-about="{{ e($primarySponsorAbout) }}" data-total-sponsors="{{ $totalSponsors }}"
+                    data-total-raised="{{ $totalRaised }}" data-status="{{ $status }}"
+                    data-highlights="{{ e($eventHighlightsHtml ?? '') }}"
+                    data-event-id="{{ $event->id }}">
+                    Quick View
+                </button>
+                @if ($event->isSponsorRegistered(auth()->id()))
+                    <a href="{{ route('sponsor.events.show', $event) }}"
+                        style="background: linear-gradient(to right, #9E2469, #B52D75); color: white; padding: 8px 16px; border-radius: 8px; font-size: 0.875rem; text-align: center; text-decoration: none; display: inline-block; transition: background 0.3s ease;"
+                        onmouseover="this.style.background='linear-gradient(to right, #B52D75, #B02A72)'"
+                        onmouseout="this.style.background='linear-gradient(to right, #9E2469, #B52D75)'">
+                        View Registration
+                    </a>
+                @elseif ($event->isRegistrationOpen())
+                    <button type="button"
+                        onclick="typeof openRegisterModal === 'function' && openRegisterModal(this)"
+                        data-register-event-id="{{ $event->id }}"
+                        data-register-title="{{ e($event->title) }}"
+                        data-register-payment-type="{{ $event->payment_type ?? 'flexible' }}"
+                        data-register-remaining="{{ $event->remaining_funding ?? 0 }}"
+                        data-register-funding-goal="{{ $event->funding_goal ?? 0 }}"
+                        style="background: linear-gradient(to right, #9E2469, #B52D75); color: white; padding: 8px 16px; border-radius: 8px; font-size: 0.875rem; text-align: center; border: none; cursor: pointer; display: inline-block; width: 100%;"
+                        onmouseover="this.style.background='linear-gradient(to right, #B52D75, #B02A72)'"
+                        onmouseout="this.style.background='linear-gradient(to right, #9E2469, #B52D75)'">
+                        Register Now
+                    </button>
+                @else
+                    <a href="{{ route('sponsor.events.show', $event) }}"
+                        class="bg-gray-400 text-white py-2 px-4 rounded-lg text-sm text-center">
+                        View Details
+                    </a>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>

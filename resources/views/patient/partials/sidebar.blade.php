@@ -1,0 +1,264 @@
+{{-- Inline styles: production may not load Vite-built patient.css; keep Apply here layout reliable. --}}
+<style>
+    .patient-nav-programs-mobile-link {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .patient-nav-programs-mobile-text {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+    .patient-nav-apply-badge-inline {
+        display: inline-flex;
+        align-items: center;
+        flex-shrink: 0;
+        border-radius: 9999px;
+        background: #9e2469;
+        color: #fff;
+        padding: 0.125rem 0.5rem;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        line-height: 1.2;
+    }
+    .navigation ul li a .title.patient-nav-programs-title {
+        white-space: normal;
+        line-height: 1.2;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        height: 60px;
+        padding: 8px 10px;
+        box-sizing: border-box;
+    }
+    .patient-nav-programs-label {
+        display: block;
+    }
+    .patient-nav-apply-badge {
+        display: inline-block;
+        margin-top: 4px;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        padding: 2px 6px;
+        border-radius: 9999px;
+        background: #9e2469;
+        color: #fff;
+        line-height: 1.2;
+    }
+</style>
+
+<!-- Mobile Sidebar -->
+<div class="mobile-sidebar" id="mobileSidebar">
+    <!-- Close Button -->
+    <button class="close-btn" id="closeBtn">
+        <img src="{{ asset('public/images/cross-white.svg') }}" alt="Close">
+    </button>
+
+    <!-- Logo -->
+    <div class="mobile-logo">
+        <img src="{{ asset('public/images/pink_me_logo.png') }}" alt="PINK ME Logo">
+    </div>
+
+    <!-- Menu -->
+    <ul class="mobile-menu">
+        <li
+            class="{{ request()->routeIs('patient.dashboard') || request()->routeIs('patient.profile') ? 'active' : '' }}">
+            <a href="{{ route('patient.dashboard') }}">
+                <img src="{{ request()->routeIs('patient.dashboard') || request()->routeIs('patient.profile') ? asset('public/images/Dashboard-svg.svg') : asset('public/images/App-Dash.svg') }}"
+                    alt="">
+                Dashboard
+            </a>
+        </li>
+
+        <li
+            class="{{ request()->routeIs('patient.myApplication') || request()->routeIs('patient.programRegistrations.show') ? 'active' : '' }}">
+            <a href="{{ route('patient.myApplication') }}">
+                <img src="{{ request()->routeIs('patient.myApplication') || request()->routeIs('patient.programRegistrations.show') ? asset('public/images/App-app.svg') : asset('public/images/My_Application.svg') }}"
+                    alt="">
+                My Applications
+            </a>
+        </li>
+
+        <li class="{{ request()->routeIs('patient.programsAndAids') ? 'active' : '' }}">
+            <a href="{{ route('patient.programsAndAids') }}" class="patient-nav-programs-mobile-link">
+                <img src="{{ request()->routeIs('patient.programsAndAids') ? asset('public/images/program-svg.svg') : asset('public/images/program.svg') }}"
+                    alt="">
+                <span class="patient-nav-programs-mobile-text">
+                    <span>Programs & Services</span>
+                    <span class="patient-nav-apply-badge-inline">Apply here</span>
+                </span>
+            </a>
+        </li>
+        {{-- Webinars - commented: sponsor/webinars not important for now
+        <li class="{{ request()->routeIs('patient.webinars') ? 'active' : '' }}">
+            <a href="{{ route('patient.webinars') }}">
+                <img src="{{ request()->routeIs('patient.webinars') ? asset('public/images/program-svg.svg') : asset('public/images/program.svg') }}"
+                    alt="">
+                Webinars
+            </a>
+        </li>
+        --}}
+
+        @if ($patientCanUseChat ?? false)
+            <li class="{{ request()->routeIs('patient.patientChats') ? 'active' : '' }}">
+                <a href="{{ route('patient.patientChats') }}">
+                    <img src="{{ request()->routeIs('patient.patientChats') ? asset('public/images/chat-svg-pink.svg') : asset('public/images/chat.svg') }}"
+                        alt="">
+                    Chat
+                </a>
+            </li>
+        @endif
+
+        <li class="{{ request()->routeIs('patient.faq') ? 'active' : '' }}">
+            <a href="{{ route('patient.faq') }}">
+                <img src="{{ request()->routeIs('patient.faq') ? asset('public/images/FAQ-pink.svg') : asset('public/images/FAQ.svg') }}"
+                    alt="">
+                FAQ
+            </a>
+        </li>
+        <li class="{{ request()->routeIs('patient.guide') ? 'active' : '' }}">
+            <a href="{{ route('patient.guide') }}">
+                <img src="{{ request()->routeIs('patient.guide') ? asset('public/images/FAQ-pink.svg') : asset('public/images/FAQ.svg') }}"
+                    alt="">
+                Tutorial
+            </a>
+        </li>
+
+        {{-- <li class="{{ request()->routeIs('patient.invoices') || request()->routeIs('invoices.show') ? 'active' : '' }}">
+            <a href="{{ route('patient.invoices') }}">
+                <img src="{{ request()->routeIs('patient.invoices') || request()->routeIs('invoices.show') ? asset('public/images/invoice.svg') : asset('public/images/invoice-pink.svg') }}"
+                    alt="">
+                Invoices
+            </a>
+        </li> --}}
+
+        <li class="{{ request()->routeIs('patient.setting') ? 'active' : '' }}">
+            <a href="{{ route('patient.setting') }}">
+                <img src="{{ request()->routeIs('patient.setting') ? asset('public/images/setting-pink.svg') : asset('public/images/setting.svg') }}"
+                    alt="">
+                Setting
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- Left Sidebar with Background Image -->
+<div class="box relative">
+    <div class="navigation">
+        <ul>
+            <li>
+                <a href="#">
+                    <img src="{{ asset('public/images/pink_me_logo.png') }}" alt="" />
+                </a>
+            </li>
+            <li
+                class="{{ request()->routeIs('patient.dashboard') || request()->routeIs('patient.profile') ? 'hovered' : '' }}">
+                <a href="{{ route('patient.dashboard') }}">
+                    <span class="icon">
+                        <img src="{{ request()->routeIs('patient.dashboard') || request()->routeIs('patient.profile') ? asset('public/images/Dashboard-svg.svg') : asset('public/images/App-Dash.svg') }}"
+                            alt="" class="width: 20px; height: 20px;" />
+                    </span>
+                    <span class="title">Dashboard</span>
+                </a>
+            </li>
+            <li
+                class="{{ request()->routeIs('patient.myApplication') || request()->routeIs('patient.programRegistrations.show') ? 'hovered' : '' }}">
+                <a href="{{ route('patient.myApplication') }}">
+                    <span class="icon">
+                        <img src="{{ request()->routeIs('patient.myApplication') || request()->routeIs('patient.programRegistrations.show') ? asset('public/images/App-app.svg') : asset('public/images/My_Application.svg') }}"
+                            alt="" />
+                    </span>
+                    <span class="title">My Application</span>
+                </a>
+            </li>
+            <li class="{{ request()->routeIs('patient.programsAndAids') ? 'hovered' : '' }}">
+                <a href="{{ route('patient.programsAndAids') }}" class="patient-nav-programs-link">
+                    <span class="icon"><img
+                            src="{{ request()->routeIs('patient.programsAndAids') ? asset('public/images/program-svg.svg') : asset('public/images/program.svg') }}"
+                            alt="" /></span>
+                    <span class="title patient-nav-programs-title">
+                        <span class="patient-nav-programs-label">Programs & Services</span>
+                        <span class="patient-nav-apply-badge" title="Apply for financial assistance">Apply here</span>
+                    </span>
+                </a>
+            </li>
+            {{-- Webinars - commented: sponsor/webinars not important for now
+            <li class="{{ request()->routeIs('patient.webinars') ? 'hovered' : '' }}">
+                <a href="{{ route('patient.webinars') }}">
+                    <span class="icon"><img
+                            src="{{ request()->routeIs('patient.webinars') ? asset('public/images/program-svg.svg') : asset('public/images/program.svg') }}"
+                            alt="" /></span>
+                    <span class="title">Webinars</span>
+                </a>
+            </li>
+            --}}
+            @if ($patientCanUseChat ?? false)
+                <li class="{{ request()->routeIs('patient.patientChats') ? 'hovered' : '' }}">
+                    <a href="{{ route('patient.patientChats') }}">
+                        <span class="icon"><img
+                                src="{{ request()->routeIs('patient.patientChats') ? asset('public/images/chat-svg-pink.svg') : asset('public/images/chat.svg') }}"
+                                alt="" /></span>
+                        <span class="title">Chat</span>
+                    </a>
+                </li>
+            @endif
+            <li class="{{ request()->routeIs('patient.faq') ? 'hovered' : '' }}">
+                <a href="{{ route('patient.faq') }}">
+                    <span class="icon"><img
+                            src="{{ request()->routeIs('patient.faq') ? asset('public/images/FAQ-pink.svg') : asset('public/images/FAQ.svg') }}"
+                            alt="" /></span>
+                    <span class="title">FAQ</span>
+                </a>
+            </li>
+            <li class="{{ request()->routeIs('patient.guide') ? 'hovered' : '' }}">
+                <a href="{{ route('patient.guide') }}">
+                    <span class="icon"><img
+                            src="{{ request()->routeIs('patient.guide') ? asset('public/images/FAQ-pink.svg') : asset('public/images/FAQ.svg') }}"
+                            alt="" /></span>
+                    <span class="title">Tutorial</span>
+                </a>
+            </li>
+            {{-- <li class="{{ request()->routeIs('patient.invoices') || request()->routeIs('invoices.show') ? 'hovered' : '' }}">
+                <a href="{{ route('patient.invoices') }}">
+                    <span class="icon"><img
+                            src="{{ request()->routeIs('patient.invoices') || request()->routeIs('invoices.show') ? asset('public/images/invoice.svg') : asset('public/images/invoice-pink.svg') }}"
+                            alt="" /></span>
+                    <span class="title">Invoices</span>
+                </a>
+            </li> --}}
+            <li class="{{ request()->routeIs('patient.setting') ? 'hovered' : '' }}">
+                <a href="{{ route('patient.setting') }}">
+                    <span class="icon"><img
+                            src="{{ request()->routeIs('patient.setting') ? asset('public/images/setting-pink.svg') : asset('public/images/setting.svg') }}"
+                            alt="" /></span>
+                    <span class="title">Setting</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <!-- Separate Sign Out button outside navigation -->
+    <div class="sign-out">
+        <a href="{{ route('logout') }}"
+   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+    <span class="icon">
+        <img src="{{ asset('images/signout.svg') }}" alt="Sign Out" />
+    </span>
+    <span class="title">Sign Out</span>
+</a>
+
+<form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+    @csrf
+</form>
+
+    </div>
+</div>
